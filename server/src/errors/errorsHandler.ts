@@ -9,7 +9,7 @@ import { IncorrectRequest } from './incorrectRequest';
 export function errorHandler(reply: FastifyReply, error: any): void {
   if (error instanceof PrismaClientKnownRequestError) {
     if (error.code === 'P2025') {
-      throw new NotFound().sendError(reply);
+      new NotFound().sendError(reply);
     }
   }
 
@@ -29,7 +29,7 @@ export function errorHandler(reply: FastifyReply, error: any): void {
     };
 
     if (zodError.issue.validation === 'uuid') {
-      throw new IncorrectRequest(`Param <${zodError.issue.path}> must be a string uuid`).sendError(reply);
+      new IncorrectRequest(`Param <${zodError.issue.path}> must be a string uuid`).sendError(reply);
     }
   }
 
