@@ -6,8 +6,30 @@ import { errorHandler } from '../errors/errorsHandler';
 
 export async function memoriesRoutes(app: FastifyInstance): Promise<void> {
   app.get('/memories', async (__, reply) => {
+    const querySchema = z.object({
+      page: z.coerce
+        .number()
+        .int()
+        .positive()
+        .default(1),
+      size: z.coerce
+        .number()
+        .int()
+        .positive()
+        .default(10),
+    });
+
     try {
-      const memories = await prisma.memory.findMany({ orderBy: { createdAt: 'asc' } });
+      const { page, size } = querySchema.parse(reply.request.query);
+
+      const memories = await prisma.memory.findMany({
+        where: { isPublic: true },
+        orderBy: { createdAt: 'asc' },
+        skip: (page - 1) * size,
+        take: size,
+      });
+
+      const memoriesCount = await prisma.memory.count();
 
       const formattedMemories = memories.map((memory) => ({
         id: memory.id,
@@ -15,8 +37,14 @@ export async function memoriesRoutes(app: FastifyInstance): Promise<void> {
         excerpt: memory.content.length > 115 ? `${memory.content.slice(0, 115)}...` : memory.content,
       }));
 
-      return reply.send({ data: formattedMemories });
+      return reply.send({
+        totalRecords: memoriesCount,
+        page,
+        size,
+        data: formattedMemories,
+      });
     } catch (error: any) {
+      console.log(error);
       errorHandler(reply, error);
     }
   });
