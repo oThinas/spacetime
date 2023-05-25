@@ -1,7 +1,7 @@
 import fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 
-import { memoriesRoutes } from './routes/memories';
+import { memoriesRoutes } from './routes/memoriesRoutes';
 
 const app = fastify();
 app.register(fastifyCors, { origin: true });
