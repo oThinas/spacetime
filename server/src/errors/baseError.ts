@@ -8,8 +8,8 @@ export class BaseError extends Error {
     this.status = status;
   }
 
-  sendError(reply: FastifyReply, error?: any) {
-    reply.status(this.status).send({
+  async sendError(reply: FastifyReply, error?: any): Promise<FastifyReply> {
+    return reply.status(this.status).send({
       error: {
         message: this.message,
         status: this.status,

@@ -1,28 +1,16 @@
-import { z } from 'zod';
-import { errorHandler } from '../errors/errorsHandler';
-import { prisma } from '../lib/prisma';
 import { FastifyReply, FastifyRequest } from 'fastify';
+import { prisma } from '../lib/prisma';
+import { z } from 'zod';
+
+import { errorHandler, replyHandler } from '../middlewares';
+import { pageableFormatter } from '../utils/pageableFormatter';
 
 async function getAll(request: FastifyRequest, reply: FastifyReply) {
-  const querySchema = z.object({
-    page: z.coerce
-      .number()
-      .int()
-      .positive()
-      .default(1),
-    size: z.coerce
-      .number()
-      .int()
-      .positive()
-      .default(10),
-  });
-
   try {
-    const { page, size } = querySchema.parse(request.query);
-
+    const { page, size } = pageableFormatter(request);
     const memories = await prisma.memory.findMany({
       orderBy: { createdAt: 'asc' },
-      skip: (page - 1) * size,
+      skip: size * (page - 1),
       take: size,
     });
 
@@ -34,10 +22,13 @@ async function getAll(request: FastifyRequest, reply: FastifyReply) {
       excerpt: memory.content.length > 115 ? `${memory.content.slice(0, 115)}...` : memory.content,
     }));
 
-    return reply.send({
-      totalRecords: memoriesCount,
-      page,
-      size,
+    replyHandler(reply, {
+      pageable: {
+        page,
+        size,
+        totalRecords: memoriesCount,
+        totalPages: Math.ceil(memoriesCount / size),
+      },
       data: formattedMemories,
     });
   } catch (error: any) {
