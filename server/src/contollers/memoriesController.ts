@@ -3,7 +3,7 @@ import { prisma } from '../lib/prisma';
 import { z } from 'zod';
 
 import { errorHandler, replyHandler } from '../middlewares';
-import { pageableFormatter } from '../utils/pageableFormatter';
+import { bodyFormatter, pageableFormatter } from '../utils';
 
 async function getAll(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -49,4 +49,22 @@ async function getById(request: FastifyRequest, reply: FastifyReply) {
   }
 }
 
-export const memoriesController = { getAll, getById };
+async function create(request: FastifyRequest, reply: FastifyReply) {
+  try {
+    const { content, coverUrl, isPublic } = bodyFormatter(request, 'create');
+    const memory = await prisma.memory.create({
+      data: {
+        content,
+        coverUrl,
+        isPublic,
+        userId: 'ea74e73b-4b04-4c46-bae9-243416e2c53d', // TODO: get user id from request
+      },
+    });
+
+    return reply.status(201).send({ data: memory });
+  } catch (error) {
+    errorHandler(reply, error);
+  }
+}
+
+export const memoriesController = { getAll, getById, create };

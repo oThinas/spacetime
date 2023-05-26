@@ -22,6 +22,7 @@ export async function errorHandler(reply: FastifyReply, error: any): Promise<Fas
         code: issue.code,
         message: issue.message,
         path: issue.path[0],
+        key: issue.keys[0],
         expected: issue.expected,
         received: issue.received,
         validation: issue.validation,
@@ -32,8 +33,17 @@ export async function errorHandler(reply: FastifyReply, error: any): Promise<Fas
       return new IncorrectRequest(`Param <${zodError.issue.path}> must be a string uuid`).sendError(reply);
     }
 
+    if (zodError.issue.code === 'unrecognized_keys') {
+      return new IncorrectRequest(`Param <${zodError.issue.key}> is not expected`).sendError(reply);
+    }
+
     if (zodError.issue.code === 'invalid_type') {
-      return new IncorrectRequest(`Param <${zodError.issue.path}> must be a <${zodError.issue.expected}>`).sendError(reply);
+      /* Caso tenha algum campo */
+      if (zodError.issue.path) {
+        return new IncorrectRequest(`Param <${zodError.issue.path}> must be a <${zodError.issue.expected}>`).sendError(reply);
+      }
+
+      return new IncorrectRequest('<body> is required').sendError(reply);
     }
   }
 

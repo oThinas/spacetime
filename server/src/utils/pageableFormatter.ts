@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { FastifyRequest } from 'fastify';
 
-export function pageableFormatter(request: FastifyRequest): { page: number, size: number } {
+export function pageableFormatter({ query }: FastifyRequest): { page: number, size: number } {
   const querySchema = z.object({
     page: z.coerce
       .number()
@@ -16,6 +16,6 @@ export function pageableFormatter(request: FastifyRequest): { page: number, size
       .default(10),
   });
 
-  const { page, size } = querySchema.parse(request.query);
+  const { page, size } = querySchema.parse(query);
   return { page, size };
 }
