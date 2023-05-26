@@ -7,4 +7,5 @@ export async function memoriesRoutes(app: FastifyInstance): Promise<void> {
   app.get('/memories/:id', memoriesController.getById);
   app.post('/memories', memoriesController.create);
   app.put('/memories/:id', memoriesController.update);
+  app.delete('/memories/:id', memoriesController.remove);
 }

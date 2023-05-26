@@ -1,9 +1,8 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { prisma } from '../lib/prisma';
-import { z } from 'zod';
 
 import { errorHandler, replyHandler } from '../middlewares';
-import { bodyFormatter, pageableFormatter } from '../utils';
+import { bodyFormatter, idExtractor, pageableFormatter } from '../utils';
 
 async function getAll(request: FastifyRequest, reply: FastifyReply) {
   try {
@@ -37,10 +36,8 @@ async function getAll(request: FastifyRequest, reply: FastifyReply) {
 }
 
 async function getById(request: FastifyRequest, reply: FastifyReply) {
-  const paramsSchema = z.object({ id: z.string().uuid() });
-
   try {
-    const { id } = paramsSchema.parse(request.params);
+    const id = idExtractor(request);
     const memory = await prisma.memory.findUniqueOrThrow({ where: { id } });
 
     return reply.send({ data: memory });
@@ -68,10 +65,8 @@ async function create(request: FastifyRequest, reply: FastifyReply) {
 }
 
 async function update(request: FastifyRequest, reply: FastifyReply) {
-  const paramsSchema = z.object({ id: z.string().uuid() });
-
   try {
-    const { id } = paramsSchema.parse(request.params);
+    const id = idExtractor(request);
     const { content, coverUrl, isPublic } = bodyFormatter(request, 'update');
 
     const oldMemory = await prisma.memory.findUniqueOrThrow({ where: { id } });
@@ -94,4 +89,15 @@ async function update(request: FastifyRequest, reply: FastifyReply) {
   }
 }
 
-export const memoriesController = { getAll, getById, create, update };
+async function remove(request: FastifyRequest, reply: FastifyReply) {
+  try {
+    const id = idExtractor(request);
+    const memory = await prisma.memory.delete({ where: { id } });
+
+    return reply.send({ data: memory });
+  } catch (error) {
+    errorHandler(reply, error);
+  }
+}
+
+export const memoriesController = { getAll, getById, create, update, remove };
