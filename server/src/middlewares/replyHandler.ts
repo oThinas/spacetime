@@ -1,13 +1,24 @@
 import { FastifyReply } from 'fastify';
 
 import { IDataReply } from '../interfaces/IDataReply';
-import { NotFound } from '../errors';
+import { ImATeaPot, NotFound } from '../errors';
+import { compareObjects } from '../utils/compareObjects';
+import { errorHandler } from './errorsHandler';
 
 export async function replyHandler(reply: FastifyReply, dataReply: IDataReply) {
-  const { data } = dataReply;
-  if (!data.length || !data) {
-    return new NotFound().sendError(reply);
-  }
+  try {
+    const { data, oldData, newData } = dataReply;
 
-  return reply.send(dataReply);
+    if (!(data && data.length) && !(oldData && newData)) {
+      throw new NotFound();
+    }
+
+    if (newData && oldData && compareObjects(newData, oldData)) {
+      throw new ImATeaPot();
+    }
+
+    return reply.send(dataReply);
+  } catch (error) {
+    errorHandler(reply, error);
+  }
 }

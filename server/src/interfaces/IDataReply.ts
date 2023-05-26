@@ -5,5 +5,7 @@ export interface IDataReply {
     totalRecords: number;
     totalPages: number;
   };
-  data: any[];
+  oldData?: any[] | object;
+  newData?: any[] | object;
+  data?: any[];
 }

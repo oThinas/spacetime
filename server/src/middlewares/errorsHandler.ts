@@ -1,14 +1,23 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { FastifyReply } from 'fastify';
 
-import { NotFound, IncorrectRequest, BaseError } from '../errors';
+import { NotFound, IncorrectRequest, BaseError, ImATeaPot } from '../errors';
 import { IZodError } from '../interfaces/IZodError';
 
 export async function errorHandler(reply: FastifyReply, error: any): Promise<FastifyReply> {
   if (error instanceof PrismaClientKnownRequestError) {
-    if (error.code === 'P2025') {
+    switch (error.code) {
+    case 'P2025':
       return new NotFound().sendError(reply);
     }
+  }
+
+  if (error instanceof NotFound) {
+    return new NotFound().sendError(reply);
+  }
+
+  if (error instanceof ImATeaPot) {
+    return new ImATeaPot().sendError(reply);
   }
 
   /**
@@ -21,24 +30,24 @@ export async function errorHandler(reply: FastifyReply, error: any): Promise<Fas
       issue: {
         code: issue.code,
         message: issue.message,
-        path: issue.path[0],
-        key: issue.keys[0],
+        path: issue.path ? issue.path[0] : null,
+        key: issue.keys ? issue.keys[0] : null,
         expected: issue.expected,
         received: issue.received,
         validation: issue.validation,
       },
     };
 
-    if (zodError.issue.validation === 'uuid') {
+    switch (zodError.issue.validation) {
+    case 'uuid':
       return new IncorrectRequest(`Param <${zodError.issue.path}> must be a string uuid`).sendError(reply);
     }
 
-    if (zodError.issue.code === 'unrecognized_keys') {
+    switch (zodError.issue.code) {
+    case 'unrecognized_keys':
       return new IncorrectRequest(`Param <${zodError.issue.key}> is not expected`).sendError(reply);
-    }
 
-    if (zodError.issue.code === 'invalid_type') {
-      /* Caso tenha algum campo */
+    case 'invalid_type':
       if (zodError.issue.path) {
         return new IncorrectRequest(`Param <${zodError.issue.path}> must be a <${zodError.issue.expected}>`).sendError(reply);
       }

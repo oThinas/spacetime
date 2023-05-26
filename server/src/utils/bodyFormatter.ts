@@ -6,19 +6,15 @@ export function bodyFormatter({ body }: FastifyRequest, mode: 'create' | 'update
     content: z.string(),
     coverUrl: z.string(),
     isPublic: z.coerce.boolean().default(false),
-  });
+  }).strict();
 
-  const bodySchemaFormatted = mode === 'create' ? stricBodyFormatter(bodySchema) : optionalBodyFormatter(bodySchema);
+  const bodySchemaFormatted = mode === 'update' ? optionalBodyFormatter(bodySchema) : bodySchema;
 
   const { content, coverUrl, isPublic } = bodySchemaFormatted.parse(body);
 
   return { content, coverUrl, isPublic };
 }
 
-function stricBodyFormatter(objectSchema: ZodObject<any>) {
-  return objectSchema.strict();
-}
-
 function optionalBodyFormatter(objectSchema: ZodObject<any>) {
-  return objectSchema.partial();
+  return objectSchema.strict().partial();
 }

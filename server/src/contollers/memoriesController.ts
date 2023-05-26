@@ -67,4 +67,31 @@ async function create(request: FastifyRequest, reply: FastifyReply) {
   }
 }
 
-export const memoriesController = { getAll, getById, create };
+async function update(request: FastifyRequest, reply: FastifyReply) {
+  const paramsSchema = z.object({ id: z.string().uuid() });
+
+  try {
+    const { id } = paramsSchema.parse(request.params);
+    const { content, coverUrl, isPublic } = bodyFormatter(request, 'update');
+
+    const oldMemory = await prisma.memory.findUniqueOrThrow({ where: { id } });
+
+    const newMemory = await prisma.memory.update({
+      where: { id },
+      data: {
+        content,
+        coverUrl,
+        isPublic,
+      },
+    });
+
+    replyHandler(reply, {
+      oldData: oldMemory,
+      newData: newMemory,
+    });
+  } catch (error) {
+    errorHandler(reply, error);
+  }
+}
+
+export const memoriesController = { getAll, getById, create, update };
