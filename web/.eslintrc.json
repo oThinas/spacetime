@@ -12,7 +12,8 @@
   ],
   "overrides": [],
   "globals": {
-    "module": "readonly"
+    "module": "readonly",
+    "process": "readonly"
   },
   "settings": {
     "react": {
