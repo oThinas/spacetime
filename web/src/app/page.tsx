@@ -15,10 +15,10 @@ export default function Home() {
       >
 
         {/* Blur */}
-        <div className='absolute right-0 top-1/2 h-[288px] w-[526px] -translate-y-1/2 translate-x-1/2 rounded-full bg-purple-700 opacity-50 blur-full'/>
+        <div className='blur-full absolute right-0 top-1/2 h-[288px] w-[526px] -translate-y-1/2 translate-x-1/2 rounded-full bg-purple-700 opacity-50'/>
 
         {/* Stripes */}
-        <div className='absolute inset-y-0 right-2 w-2 bg-stripes'/>
+        <div className='bg-stripes absolute inset-y-0 right-2 w-2'/>
 
         {isAuthenticated ? <Profile/> : <SignIn/>}
 

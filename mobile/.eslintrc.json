@@ -12,7 +12,9 @@
   ],
   "overrides": [],
   "globals": {
-    "module": "readonly"
+    "module": "readonly",
+    "require": "readonly",
+    "process": "readonly"
   },
   "settings": {
     "react": {

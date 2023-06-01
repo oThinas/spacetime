@@ -17,7 +17,11 @@ export function Hero() {
         </p>
       </div>
 
-      <a href='' className='inline-block rounded-full bg-green-500 px-5 py-3 font-alt text-sm uppercase leading-none text-black hover:bg-green-600'>
+      <a
+        href=''
+        className='font-alt inline-block rounded-full border border-green-500 px-5 py-3 text-sm uppercase leading-none text-green-500
+        transition-colors duration-300 hover:bg-green-500 hover:text-white'
+      >
       Cadastrar lembrança
       </a>
     </div>
